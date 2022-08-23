@@ -1,18 +1,24 @@
 package com.example.demo.model;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
-@Entity 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+@Entity
 public class Empleados {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	//@Column(name = "id_Empleado")
 	private Integer id;
 
 	@Column(nullable = false, length = 45)
@@ -32,15 +38,24 @@ public class Empleados {
 
 	@Column(nullable = false, length = 45)
 	private String sexo;
-
-	@OneToMany
-	private Collection<Beneficiarios> beneficiarios;
 	
+
+	// Getter y setter of collection
+	@JsonManagedReference
+	@OneToMany(
+			mappedBy = "empleados",
+			cascade = CascadeType.ALL,
+			orphanRemoval = true, fetch = FetchType.EAGER
+	)
+	private List<Beneficiarios> beneficiarios;
+
 	public Empleados() {
+		beneficiarios = new ArrayList<Beneficiarios>();
 	}
 
 	public Empleados(Integer id, String nombre, String apellidoPaterno, String apellidoMaterno, String rfc,
 			String estadoCivil, String sexo) {
+		super();
 		this.id = id;
 		this.nombre = nombre;
 		this.apellidoPaterno = apellidoPaterno;
@@ -105,13 +120,22 @@ public class Empleados {
 	public void setSexo(String sexo) {
 		this.sexo = sexo;
 	}
-	
-	//Getter y setter of collection
-	public Collection<Beneficiarios> getBeneficiarios() {
+
+	public List<Beneficiarios> getBeneficiarios() {
 		return beneficiarios;
 	}
 
-	public void setBeneficiarios(Collection<Beneficiarios> beneficiarios) {
+	public void setBeneficiarios(List<Beneficiarios> beneficiarios) {
 		this.beneficiarios = beneficiarios;
 	}
+	
+	public void addBeneficiario(Beneficiarios beneficiario){
+        beneficiarios.add(beneficiario);
+        beneficiario.setEmpleado(this);
+        
+    }
+    public void removeBeneficiario(Beneficiarios beneficiario){
+        beneficiarios.remove(beneficiario);        
+        beneficiario.setEmpleado(null);
+    }
 }
